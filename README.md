@@ -22,29 +22,7 @@
 
 ---
 
-## Architecture Overview
 
-```
-[ Web Client: Text / Voice Input ]
-               │
-               ▼
-       [ Flask Web Server ]
-         ├── /chat (JSON API)
-         └── /voice (Audio Upload + Faster Whisper STT)
-               │
-               ▼
-   [ CareerGuide Comparison & RAG Router ]
-         ├── Course Comparison Engine (Direct Multi-Course Matrix)
-         └── LlamaIndex Query Engine (Qdrant Vector Retrieval + Groq LLM)
-               │
-               ▼
-       [ Output Generation ]
-         ├── Markdown Text + Source Citations (Web UI)
-         ├── Markdown Sanitizer (voice_service.py)
-         └── gTTS Audio Synthesis (Spoken Response)
-```
-
----
 
 ## Project Structure
 
@@ -121,16 +99,3 @@ The system was evaluated against golden ground-truth career benchmark questions 
 | **Faithfulness** | **57.1%** | Responses are strictly grounded in retrieved NCERT document chunks without hallucinations. |
 | **Context Precision** | **50.0%** | Signal-to-noise ratio of top retrieved chunks relative to the specific target queries. |
 
-### To Re-run Evaluation Locally:
-```bash
-# Step 1: Generate/update benchmark query dataset
-python generate_eval_dataset.py
-
-# Step 2: Calculate and display metrics
-python evaluate_career_guide.py
-```
-
----
-
-## License
-Open-source under the MIT License.
