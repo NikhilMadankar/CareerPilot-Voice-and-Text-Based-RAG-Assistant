@@ -88,14 +88,7 @@ Open **`http://localhost:5000`** in any web browser.
 
 ---
 
-## Quantitative Evaluation Results
 
-The system was evaluated against golden ground-truth career benchmark questions using sentence embedding similarity and context matrix overlap:
 
-| Metric | Score | Description |
-|---|:---:|---|
-| **Context Recall** | **100.0%** | All necessary course context and eligibility requirements were successfully retrieved from Qdrant. |
-| **Answer Correctness** | **70.1%** | High semantic alignment between generated advice and official ground-truth answers. |
-| **Faithfulness** | **57.1%** | Responses are strictly grounded in retrieved NCERT document chunks without hallucinations. |
-| **Context Precision** | **50.0%** | Signal-to-noise ratio of top retrieved chunks relative to the specific target queries. |
+
 
