@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerGuide AI — AI-Powered Career & Course Guidance Assistant</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Markdown Parser for rich formatting -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        :root {
+            --bg-gradient: radial-gradient(circle at top right, #1e1b4b 0%, #0f172a 50%, #020617 100%);
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --primary-glow: rgba(99, 102, 241, 0.35);
+            --accent: #06b6d4;
+            --accent-glow: rgba(6, 182, 212, 0.25);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --user-bubble: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+            --ai-bubble: rgba(15, 23, 42, 0.85);
+            --source-tag-bg: rgba(99, 102, 241, 0.15);
+            --source-tag-border: rgba(99, 102, 241, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(12px);
+            border-radius: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #6366f1, #06b6d4);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: white;
+            box-shadow: 0 4px 14px var(--primary-glow);
+        }
+
+        .brand-text h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(90deg, #fff, #cbd5e1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-text p {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .badge-ncert {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(6, 182, 212, 0.12);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            color: #38bdf8;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Chat History Area */
+        .chat-box {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(12px);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 16px;
+            scroll-behavior: smooth;
+        }
+
+        .chat-box::-webkit-scrollbar {
+            width: 6px;
+        }
+        .chat-box::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
+        }
+
+        /* Message Bubbles */
+        .message-row {
+            display: flex;
+            gap: 12px;
+            max-width: 85%;
+            animation: fadeIn 0.3s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message-row.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message-row.ai {
+            align-self: flex-start;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            flex-shrink: 0;
+        }
+
+        .user .avatar {
+            background: #4f46e5;
+            color: white;
+        }
+
+        .ai .avatar {
+            background: linear-gradient(135deg, #06b6d4, #3b82f6);
+            color: white;
+            box-shadow: 0 2px 10px var(--accent-glow);
+        }
+
+        .bubble {
+            padding: 14px 18px;
+            border-radius: 16px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .user .bubble {
+            background: var(--user-bubble);
+            color: white;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.25);
+        }
+
+        .ai .bubble {
+            background: var(--ai-bubble);
+            color: #e2e8f0;
+            border: 1px solid var(--card-border);
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .ai .bubble p { margin-bottom: 8px; }
+        .ai .bubble p:last-child { margin-bottom: 0; }
+        .ai .bubble ul, .ai .bubble ol { margin-left: 20px; margin-bottom: 8px; }
+        .ai .bubble li { margin-bottom: 4px; }
+        .ai .bubble strong { color: #38bdf8; }
+
+        /* Tables in AI message */
+        .ai .bubble table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            font-size: 13px;
+        }
+        .ai .bubble th, .ai .bubble td {
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 8px 10px;
+            text-align: left;
+        }
+        .ai .bubble th {
+            background: rgba(99, 102, 241, 0.2);
+            color: #38bdf8;
+        }
+
+        /* Sources / Citations list */
+        .sources-container {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .source-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: var(--source-tag-bg);
+            border: 1px solid var(--source-tag-border);
+            color: #a5b4fc;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .source-tag i { color: #818cf8; }
+
+        /* Suggestions Carousel */
+        .suggestions {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 4px 0 10px 0;
+            scrollbar-width: none;
+        }
+        .suggestions::-webkit-scrollbar { display: none; }
+
+        .suggestion-chip {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #cbd5e1;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .suggestion-chip:hover {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: #818cf8;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        /* Input Controls */
+        .input-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(12px);
+            padding: 8px 12px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .input-bar input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: white;
+            font-size: 14px;
+            padding: 8px;
+            font-family: inherit;
+        }
+
+        .input-bar input::placeholder {
+            color: #64748b;
+        }
+
+        .btn-icon {
+            height: 42px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            transition: all 0.2s ease;
+            padding: 0 14px;
+            gap: 6px;
+        }
+
+        .btn-send {
+            width: 42px;
+            padding: 0;
+            background: var(--primary);
+            color: white;
+        }
+        .btn-send:hover {
+            background: var(--primary-hover);
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        .btn-mic {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #e2e8f0;
+        }
+
+        .btn-mic:hover {
+            background: rgba(6, 182, 212, 0.15);
+            border-color: #06b6d4;
+            color: #38bdf8;
+        }
+
+        .btn-mic.recording {
+            background: #ef4444 !important;
+            color: white !important;
+            animation: pulse-red 1.5s infinite;
+            border-color: #f87171 !important;
+        }
+
+        .btn-stop-audio {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
+            font-size: 12px;
+            font-weight: 600;
+            display: none;
+        }
+        .btn-stop-audio:hover {
+            background: rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        /* Voice Status Banner */
+        .voice-status {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+            color: #38bdf8;
+            margin-top: 6px;
+            padding-left: 12px;
+        }
+
+        .voice-status.active {
+            display: flex;
+        }
+
+        .recording-wave {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .recording-wave span {
+            width: 3px;
+            height: 12px;
+            background: #38bdf8;
+            border-radius: 2px;
+            animation: wave 1s infinite ease-in-out alternate;
+        }
+        .recording-wave span:nth-child(2) { animation-delay: 0.2s; height: 18px; }
+        .recording-wave span:nth-child(3) { animation-delay: 0.4s; height: 10px; }
+
+        @keyframes wave {
+            0% { transform: scaleY(0.4); }
+            100% { transform: scaleY(1.2); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Header -->
+    <header>
+        <div class="brand">
+            <div class="brand-icon">
+                <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+            <div class="brand-text">
+                <h1>CareerGuide AI</h1>
+                <p>AI-Powered Career & Course Guidance Assistant</p>
+            </div>
+        </div>
+        <div class="badge-ncert">
+            <i class="fa-solid fa-book-bookmark"></i> NCERT +2 Courses (113+ Streams)
+        </div>
+    </header>
+
+    <!-- Chat Messages -->
+    <div class="chat-box" id="chatOutput">
+        <!-- Welcome Message -->
+        <div class="message-row ai">
+            <div class="avatar"><i class="fa-solid fa-robot"></i></div>
+            <div class="bubble">
+                <p>👋 Hello! I am <strong>CareerGuide AI</strong>, your educational & career counselor.</p>
+                <p>I can help you explore <strong>100+ academic streams, eligibility criteria, entrance tests, degree options, and career scope</strong> after 10+2 from the official NCERT handbook.</p>
+                <p>You can type your query or tap the 🎤 microphone to talk to me!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Suggestions -->
+    <div class="suggestions">
+        <div class="suggestion-chip" data-query="Compare Biotechnology vs Biomedical Engineering">
+            ⚖️ Compare Biotech vs Biomedical
+        </div>
+        <div class="suggestion-chip" data-query="What are the eligibility criteria and career options in Artificial Intelligence & Machine Learning?">
+            🤖 AI & Machine Learning
+        </div>
+        <div class="suggestion-chip" data-query="What are the career options in Design and Fine Arts?">
+            🎨 Design & Fine Arts Careers
+        </div>
+        <div class="suggestion-chip" data-query="Tell me about Aeronautical vs Aerospace Engineering">
+            🚀 Aeronautical vs Aerospace
+        </div>
+        <div class="suggestion-chip" data-query="I like biology and mathematics, what courses should I consider?">
+            🔬 Courses for PCMB Students
+        </div>
+    </div>
+
+    <!-- Input Bar -->
+    <div class="input-bar">
+        <button class="btn-icon btn-mic" id="voiceBtn" title="Speak Query">
+            <i class="fa-solid fa-microphone" id="micIcon"></i>
+            <span id="micText">Voice</span>
+        </button>
+        <button class="btn-icon btn-stop-audio" id="stopSpeaking" title="Mute bot speech">
+            <i class="fa-solid fa-volume-xmark"></i> Stop Audio
+        </button>
+        <input type="text" id="textQuery" placeholder="Ask about career choices, courses, eligibility, or compare two fields..." autocomplete="off">
+        <button class="btn-icon btn-send" id="sendTextBtn" title="Send Message">
+            <i class="fa-solid fa-paper-plane"></i>
+        </button>
+    </div>
+
+    <!-- Live Status Banner -->
+    <div class="voice-status" id="voiceStatus">
+        <div class="recording-wave">
+            <span></span><span></span><span></span>
+        </div>
+        <span id="statusText">Listening... Speak now</span>
+    </div>
+
+    <!-- Audio Player for Spoken Voice Responses -->
+    <audio id="ttsAudio" style="display:none;"></audio>
+</div>
+
+<script src="/static/js/app.js"></script>
+</body>
+</html>
